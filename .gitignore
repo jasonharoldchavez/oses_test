@@ -1,4 +1,13 @@
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+*.zip
+.venv/
+venv/
 anomaly_audit_log.csv
 .DS_Store

@@ -69,7 +69,7 @@ class AdaptiveCUSUMDetector(AbstractDecisionLayer):
 # 3. EVALUATION TEST ENGINE MAIN LOOP (HIGH FIDELITY + ADAPTIVE)
 # =====================================================================
 if __name__ == "__main__":
-    from detectors.models import CUSUMDecisionEngine, SimpleMovingAverageDetector, EWMADetector
+    from .models import CUSUMDecisionEngine, SimpleMovingAverageDetector, EWMADetector
     from scenarios.generators import DynamicSensor
 
     print("=" * 85)
