@@ -1,0 +1,43 @@
+======================================================================
+         STREAMING GUARDIAN V1.0.0 - MODEL BEHAVIOR CERTIFICATE
+======================================================================
+Generated At: 2026-06-29 13:53:46 UTC
+Package Name: streaming_guardian
+Core Engine : Adaptive CUSUM-Based Sequential Inference Engine
+
+VALIDATION CONFIGURATION METADATA:
+----------------------------------------------------------------------
+Random Seed    : 42                      Burn-In Window : 30 samples
+Noise Sigma (σ): 2.5                     Drift Rate     : 0.05 / sample
+Jump Magnitude : +15.0 units             SDK Version    : 1.0.0
+Python Version : 3.13.13                 Git Commit Reference: b93fa9c
+
+PROPRIETARY VALIDATION HARNESS REPORT:
+----------------------------------------------------------------------
+1. CHANGE-POINT SENSITIVITY (CREEPING DRIFT)
+   - Profile          : Non-stationary mean injection (Gradual leak)
+   - Empirical Lag    : 16 samples
+   - Classification   : Bounded Memory Accumulation [PASSED]
+
+2. NOISE ROBUSTNESS (VARIANCE TOLERANCE)
+   - Profile          : Low SNR Regime / Heteroscedastic Noise Stress
+   - Target Variance  : Sigma = 2.5 (Extreme variance scale)
+   - False Alarm Rate : 2.00%
+   - Classification   : Adaptive Thresholding Resilience [PASSED]
+
+3. SHOCK RESPONSE (STEP DISCONTINUITY)
+   - Profile          : Instantaneous Structural Jump (10.0 -> 25.0)
+   - Reaction Delay   : 0 samples
+   - Classification   : High-Gain Sudden Change Interception [PASSED]
+
+4. RUNTIME INPUT ROBUSTNESS
+   - Profile          : Malformed streams / Missing Types (NaN, String)
+   - Stability Status : PASSED
+   - Classification   : Runtime Stability Under Tested Inputs [PASSED]
+
+----------------------------------------------------------------------
+SYSTEM INFERENCE SUMMARY:
+The underlying streaming guardian module has behaviorally proven 
+reproducible structural stability under non-stationarity, extreme variance 
+noise, and input discontinuities matching the constraints detailed above.
+======================================================================
