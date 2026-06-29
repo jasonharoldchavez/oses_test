@@ -1,6 +1,6 @@
 import numpy as np
 import time
-from framework_core import AdaptiveCUSUMDetector
+from streaming_guardian.detectors.framework_core import AdaptiveCUSUMDetector
 
 # --- Baseline 1: Standard Static CUSUM (Requires a pre-calibrated mean) ---
 class StaticCUSUMDetector:
