@@ -1,0 +1,32 @@
+STREAMING GUARDIAN COMMERCIAL SOFTWARE LICENSE AGREEMENT
+Version 1.0.0 - June 2026
+
+Copyright (c) 2026 Jason Harold Chavez. All rights reserved.
+
+IMPORTANT: PLEASE READ THIS AGREEMENT CAREFULLY. BY PURCHASING, DOWNLOADING, INSTALLING, OR USING THIS SOFTWARE ("SOFTWARE"), YOU AGREE TO BE BOUND BY THESE TERMS.
+
+1. LICENSE GRANT & SCOPE
+The Licensor (Jason Harold Chavez) grants the purchaser ("Licensee") a non-exclusive, non-transferable, perpetual, worldwide license to use, modify, and integrate the Software into proprietary applications, internal systems, or commercial client work, subject to the seat restrictions defined at the point of purchase.
+
+2. PERMITTED USES
+* Integration into commercial, closed-source production pipelines.
+* Modification of the source code to support your internal infrastructure.
+* Distribution of the Software *only* when compiled, obfuscated, or embedded as an inseparable backend dependency within a larger commercial application.
+
+3. STRICT PROHIBITIONS (ANTI-COMPETITION & LEAKS)
+* NO RAW REDISTRIBUTION: You shall not redistribute, sell, sublicense, rent, or share the raw Python source code, modules, or tests of the Software to any third party.
+* NO PUBLIC REPOSITORIES: You shall not host the Software in public repositories (e.g., public GitHub repos).
+* NO COMPETING PRODUCTS: You shall not use the Software, its architecture, or its source code as the core foundation to build, market, or sell a competing anomaly detection library, SDK, or developer asset marketplace plugin.
+
+4. SEAT HOLDER RESTRICTIONS
+* Personal/Individual License: Valid for one (1) single developer layout.
+* Team/Corporate License: Valid only for the specific number of engineering seats purchased at checkout.
+
+5. WARRANTY DISCLAIMER & LIABILITY LIMITS
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+
+6. NO SUPPORT OBLIGATION
+This license does not include technical support, integration assistance, phone consultation, or code maintenance. The Licensor operates on a completely hands-off distribution model. 
+
+7. TERMINATION
+Any violation of Section 3 or 4 results in the immediate, automatic termination of this license. Upon termination, the Licensee must destroy all copies of the Software source code.
