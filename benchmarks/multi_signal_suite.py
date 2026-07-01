@@ -1,5 +1,7 @@
 import numpy as np
 from benchmarks.continuous_ensemble import ContinuousEnsembleRouter, LinearModel, MeanRevModel
+from benchmarks.baselines import PersistenceModel, EWMAModel
+
 def generate_scenarios():
     np.random.seed(42)
     scenarios = {}
@@ -8,26 +10,47 @@ def generate_scenarios():
     scenarios['step_change'] = ([10.0]*25 + [20.0]*25 + np.random.normal(0, 0.1, 50)).tolist()
     scenarios['random_walk'] = np.cumsum(np.random.normal(0, 0.5, 50) + 0.1).tolist()
     return scenarios
+
 def run_macro_assessment():
     scenarios = generate_scenarios()
     router = ContinuousEnsembleRouter()
     lin_model = LinearModel()
     mr_model = MeanRevModel()
-    print('=' * 75)
-    print('MACRO-LEVEL MULTI-SIGNAL EVALUATION SUITE')
-    print('=' * 75)
+    pers_model = PersistenceModel()
+    ewma_model = EWMAModel(alpha=0.3)
+    
+    print('=' * 115)
+    print('DYNAMIC ORACLE REGRET ANALYSIS & FORECASTING EFFICIENCY MATRIX')
+    print('=' * 115)
     for name, stream in scenarios.items():
-        router_errors, lin_errors, mr_errors = [], [], []
+        router_loss = 0.0
+        dynamic_oracle_loss = 0.0
+        
         for i in range(10, len(stream)):
             window = stream[:i]
             target = stream[i]
-            r_pred, _, _, _ = router.blend_and_forecast(window)
-            l_pred = lin_model.predict(window)
-            m_pred = mr_model.predict(window)
-            router_errors.append(abs(r_pred - target))
-            lin_errors.append(abs(l_pred - target))
-            mr_errors.append(abs(m_pred - target))
-        print(f'{name:<15} | Router MAE: {np.mean(router_errors):.3f} | Linear MAE: {np.mean(lin_errors):.3f} | Mean-Rev MAE: {np.mean(mr_errors):.3f}')
-    print('=' * 75)
+            
+            r_pred, _ = router.blend_and_forecast(window)
+            
+            l_err = abs(lin_model.predict(window) - target)
+            m_err = abs(mr_model.predict(window) - target)
+            p_err = abs(pers_model.predict(window) - target)
+            e_err = abs(ewma_model.predict(window) - target)
+            r_err = abs(r_pred - target)
+            
+            router_loss += r_err
+            # Dynamic Oracle: Always selects the single absolute best error at step t
+            dynamic_oracle_loss += min(l_err, m_err, p_err, e_err)
+            
+        n_steps = len(stream) - 10
+        router_mae = router_loss / n_steps
+        
+        # Calculate dynamic regret and efficiency metric
+        dynamic_regret = router_loss - dynamic_oracle_loss
+        oracle_efficiency = dynamic_oracle_loss / (router_loss + 1e-5)
+        
+        print(f'{name:<15} | Router MAE: {router_mae:.3f} | Dynamic Oracle Regret: {dynamic_regret:+.3f} | Oracle Efficiency (eta): {oracle_efficiency:.3f}')
+    print('=' * 115)
+
 if __name__ == '__main__':
     run_macro_assessment()
