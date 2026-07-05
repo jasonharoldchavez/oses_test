@@ -1,5 +1,5 @@
 import numpy as np
-from framework_core import AbstractDecisionLayer
+from .framework_core import AbstractDecisionLayer
 
 class CUSUMDecisionEngine(AbstractDecisionLayer):
     def __init__(self, threshold_h=4.605, noise_floor=10.8):
