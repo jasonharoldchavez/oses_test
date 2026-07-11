@@ -1,13 +1,18 @@
+import os
+import sys
+
+# Dynamically resolve root directory to make script fully portable
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy as np
 import time
-import sys
 
 # 1. Import the Experimental V2 from the sandbox
 from streaming_guardian.detectors.icsf_constraint_v2 import ICSFConstraintDetector as DetectorV2
 
-# 2. Import the Production Baseline
+# 2. Import the Production Baseline 
 # If production is in a parent directory, we can temporarily patch the path safely in memory
-sys.path.append('../../production_project') 
+sys.path.append('../../production_project')
 try:
     # Adjust this import path to match where your untouched production file lives
     from streaming_guardian.detectors.icsf_constraint import ICSFConstraintDetector as DetectorProd
@@ -50,12 +55,12 @@ for idx, frame in enumerate(test_stream):
     # Pass the exact same frame copy to both
     p_res = prod_engine.update(frame.copy())
     v2_res = v2_engine.update(frame.copy())
-    
+
     # Extract statuses (handling differing return dictionary structures safely)
     p_status = p_res if isinstance(p_res, str) else p_res.get("status")
     v2_status = v2_res["status"]
     v2_penalty = v2_res["penalty_score"]
-    
+
     print(f"{idx+1:<6} | {p_status:<24} | {v2_status:<24} | {v2_penalty:.4f}")
 
 print("=====================================================================")
