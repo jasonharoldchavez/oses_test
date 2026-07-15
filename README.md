@@ -28,7 +28,9 @@ See:
 
 Copyright (c) 2026 Jason Harold Chavez.
 
-All rights reserved.  Streaming Guardian (Developer SDK)
+This project is dual licensed under Apache License 2.0 and a separate Commercial License.
+
+Streaming Guardian (Developer SDK)
 
 Streaming Guardian is a production-grade, lightweight sequential data drift testing module and streaming anomaly detection SDK. It provides an installable package layout alongside independent benchmarking harnesses to evaluate sequential metrics under controlled statistical profiles.
 
