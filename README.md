@@ -1,4 +1,34 @@
-# Streaming Guardian (Developer SDK)
+# Streaming Guardian
+
+Streaming Guardian is an adaptive anomaly detection and telemetry
+analysis framework designed for real-time monitoring, detection, and
+validation of streaming data systems.
+
+## License
+
+Streaming Guardian is dual licensed.
+
+### Open Source License
+
+The community edition is available under the Apache License 2.0.
+
+See:
+`LICENSE`
+
+### Commercial License
+
+Organizations requiring proprietary deployment, enterprise usage,
+commercial redistribution rights, customization, or additional
+licensing options may use the commercial license.
+
+See:
+`LICENSE-COMMERCIAL.txt`
+
+## Copyright
+
+Copyright (c) 2026 Jason Harold Chavez.
+
+All rights reserved.  Streaming Guardian (Developer SDK)
 
 Streaming Guardian is a production-grade, lightweight sequential data drift testing module and streaming anomaly detection SDK. It provides an installable package layout alongside independent benchmarking harnesses to evaluate sequential metrics under controlled statistical profiles.
 
