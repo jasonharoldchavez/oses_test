@@ -1,32 +1,94 @@
-STREAMING GUARDIAN COMMERCIAL SOFTWARE LICENSE AGREEMENT
-Version 1.0.0 - June 2026
+Apache License 2.0
 
+Copyright (c) 2026 Jason Harold Chavez
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+
+You may obtain a copy of the License at:
+
+https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+
+See the License for the specific language governing permissions and
+limitations under the License.                  STREAMING GUARDIAN COMMERCIAL SOFTWARE LICENSE AGREEMENT
+Version 1.0.0
 Copyright (c) 2026 Jason Harold Chavez. All rights reserved.
 
-IMPORTANT: PLEASE READ THIS AGREEMENT CAREFULLY. BY PURCHASING, DOWNLOADING, INSTALLING, OR USING THIS SOFTWARE ("SOFTWARE"), YOU AGREE TO BE BOUND BY THESE TERMS.
+IMPORTANT:
+This software is dual licensed. The open-source version is provided
+under the Apache License 2.0. Commercial users requiring additional
+rights may obtain a commercial license under the terms below.
 
-1. LICENSE GRANT & SCOPE
-The Licensor (Jason Harold Chavez) grants the purchaser ("Licensee") a non-exclusive, non-transferable, perpetual, worldwide license to use, modify, and integrate the Software into proprietary applications, internal systems, or commercial client work, subject to the seat restrictions defined at the point of purchase.
+1. LICENSE GRANT
 
-2. PERMITTED USES
-* Integration into commercial, closed-source production pipelines.
-* Modification of the source code to support your internal infrastructure.
-* Distribution of the Software *only* when compiled, obfuscated, or embedded as an inseparable backend dependency within a larger commercial application.
+The Licensor, Jason Harold Chavez, grants the Licensee a
+non-exclusive, worldwide license to use, modify, and integrate the
+Software for authorized commercial purposes.
 
-3. STRICT PROHIBITIONS (ANTI-COMPETITION & LEAKS)
-* NO RAW REDISTRIBUTION: You shall not redistribute, sell, sublicense, rent, or share the raw Python source code, modules, or tests of the Software to any third party.
-* NO PUBLIC REPOSITORIES: You shall not host the Software in public repositories (e.g., public GitHub repos).
-* NO COMPETING PRODUCTS: You shall not use the Software, its architecture, or its source code as the core foundation to build, market, or sell a competing anomaly detection library, SDK, or developer asset marketplace plugin.
+This license allows commercial organizations to use the Software in
+proprietary applications, internal systems, products, and services.
 
-4. SEAT HOLDER RESTRICTIONS
-* Personal/Individual License: Valid for one (1) single developer layout.
-* Team/Corporate License: Valid only for the specific number of engineering seats purchased at checkout.
+2. PERMITTED COMMERCIAL USES
 
-5. WARRANTY DISCLAIMER & LIABILITY LIMITS
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE.
+The Licensee may:
 
-6. NO SUPPORT OBLIGATION
-This license does not include technical support, integration assistance, phone consultation, or code maintenance. The Licensor operates on a completely hands-off distribution model. 
+- Integrate the Software into commercial applications.
+- Modify the Software for internal business requirements.
+- Deploy the Software as part of commercial products or services.
+- Use the Software in private production environments.
+
+3. RESTRICTIONS
+
+The Licensee may not:
+
+- Sell or redistribute the raw source code as a standalone product.
+- Publish the commercial source code in a public repository.
+- Sublicense the Software as a competing developer asset.
+- Remove copyright notices.
+- Use the Software primarily to create a competing anomaly detection
+  framework, SDK, or equivalent commercial product without permission.
+
+4. OWNERSHIP
+
+The Software, source code, architecture, documentation, and associated
+intellectual property remain the exclusive property of Jason Harold
+Chavez.
+
+This license grants usage rights only and does not transfer ownership.
+
+5. SUPPORT
+
+Unless separately agreed in writing, this license does not include:
+- Technical support
+- Custom development
+- Maintenance
+- Consulting services
+
+6. WARRANTY DISCLAIMER
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED.
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM,
+DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF THIS SOFTWARE.
 
 7. TERMINATION
-Any violation of Section 3 or 4 results in the immediate, automatic termination of this license. Upon termination, the Licensee must destroy all copies of the Software source code.
+
+Violation of these terms terminates the commercial license.
+
+Upon termination, the Licensee must stop unauthorized use of the
+Software.
+
+8. COMMERCIAL LICENSING CONTACT
+
+For commercial licensing:
+
+Jason Harold Chavez
+
+[chavezjason950@gmail.com]
+
+END OF LICENSE
