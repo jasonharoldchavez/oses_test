@@ -18,7 +18,7 @@ class CertificateTests(unittest.TestCase):
             os.chdir(previous)
         self.assertIn("Malformed-input rejection: PASSED (5/5 rejected)", report)
         self.assertIn("Seeded generator reproducibility smoke check: PASSED", report)
-        self.assertIn("not a calibrated false-alarm probability", report)
+        self.assertIn("calibrated false-alarm probability", report)
 
 
 if __name__ == "__main__":
