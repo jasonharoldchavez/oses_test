@@ -74,8 +74,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
         pre_change_ci = wilson_interval(metrics["false_alarm_trials"], num_trials)
         detection_ci = wilson_interval(metrics["detected_trials"], num_trials)
 
-        print(f"
-Scenario: {regime['name']}")
+        print(f"\nScenario: {regime['name']}")
         print(f"  Pre-change alarm-trial probability:        {metrics['false_alarm_trial_probability']:.4f} ({metrics['false_alarm_trials']}/{num_trials}); Wilson 95% CI [{pre_change_ci[0]:.4f}, {pre_change_ci[1]:.4f}]")
         print(f"  Pre-change alarm-sample rate:              {metrics['false_alarm_sample_rate']:.6f} ({metrics['false_alarm_samples']}/{metrics['pre_change_samples']})")
         print(f"  Post-change detection probability:         {metrics['detection_probability']:.4f} ({metrics['detected_trials']}/{num_trials}); Wilson 95% CI [{detection_ci[0]:.4f}, {detection_ci[1]:.4f}]")
@@ -83,8 +82,7 @@ Scenario: {regime['name']}")
         print(f"  No-change alarm-sample rate:               {no_change_alarm_samples / (num_trials * stream_length):.6f} ({no_change_alarm_samples}/{num_trials * stream_length})")
         print(f"  Mean delay, conditional on detection:      {metrics['mean_delay_given_detection']:.2f} samples")
         print(f"  Runtime:                                   {elapsed_ms:.2f} ms")
-    print("
-Empirical results only; they are not universal performance guarantees.")
+    print("\nEmpirical results only; they are not universal performance guarantees.")
 
 
 if __name__ == "__main__":
