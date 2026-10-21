@@ -57,9 +57,9 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
         detection_probability = metrics["detection_probability"]
         mean_delay = metrics["mean_delay_given_detection"]
         print(f"\nScenario: {regime['name']}")
-        print(f"  Pre-change false-alarm trial probability: {trial_probability:.4f} ({metrics["false_alarm_trials"]}/{num_trials})")
-        print(f"  Pre-change false-alarm sample rate:       {sample_rate:.6f} ({metrics["false_alarm_samples"]}/{metrics["pre_change_samples"]})")
-        print(f"  Post-change detection probability:        {detection_probability:.4f} ({metrics["detected_trials"]}/{num_trials})")
+        print(f"  Pre-change false-alarm trial probability: {trial_probability:.4f} ({metrics['false_alarm_trials']}/{num_trials})")
+        print(f"  Pre-change false-alarm sample rate:       {sample_rate:.6f} ({metrics['false_alarm_samples']}/{metrics['pre_change_samples']})")
+        print(f"  Post-change detection probability:        {detection_probability:.4f} ({metrics['detected_trials']}/{num_trials})")
         print(f"  Mean delay, conditional on detection:     {mean_delay:.2f} samples")
         print(f"  Runtime:                                  {elapsed_ms:.2f} ms")
     print("\nEmpirical results only; they are not universal performance guarantees.")
