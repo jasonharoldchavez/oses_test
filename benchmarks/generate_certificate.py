@@ -1,115 +1,105 @@
-import numpy as np
-import sys
-import subprocess
+"""Generate an explicitly scoped empirical behavior report, not a guarantee."""
 import datetime
+import math
+import subprocess
+import sys
+import numpy as np
 from streaming_guardian import AdaptiveCUSUMDetector
+
 
 def get_git_commit():
     try:
-        return subprocess.check_output(["git", "rev-parse", "--short", "HEAD"]).decode("utf-8").strip()
+        return subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], stderr=subprocess.DEVNULL
+        ).decode("utf-8").strip()
     except Exception:
-        return "N/A (Not inside a clean git tree)"
+        return "unavailable"
+
 
 def generate_certificate():
     timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
-    git_commit = get_git_commit()
-    python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
-    
-    # Run evaluations to gather empirical data
-    np.random.seed(42)
-    
-    # 1. Slow Poison (Creeping Drift)
+    rng = np.random.default_rng(42)
+
     detector_drift = AdaptiveCUSUMDetector(burn_in=30)
     drift_lag = -1
     for i in range(100):
-        val = 10.0 + np.random.normal(0, 0.2) + (max(0, i - 30) * 0.05)
-        is_alarm, _ = detector_drift.update(val)
-        if is_alarm and drift_lag == -1:
+        value = 10.0 + rng.normal(0, 0.2) + max(0, i - 30) * 0.05
+        alarm, _ = detector_drift.update(float(value))
+        if alarm and drift_lag == -1:
             drift_lag = i - 30
             break
 
-    # 2. Noise Robustness
     detector_noise = AdaptiveCUSUMDetector(burn_in=30)
-    false_positives = 0
+    false_alarm_samples = 0
     total_noise_samples = 100
-    for i in range(total_noise_samples):
-        val = 10.0 + np.random.normal(0, 2.5)
-        is_alarm, _ = detector_noise.update(val)
-        if is_alarm:
-            false_positives += 1
-    fpr = (false_positives / total_noise_samples) * 100
+    for _ in range(total_noise_samples):
+        alarm, _ = detector_noise.update(float(10.0 + rng.normal(0, 2.5)))
+        false_alarm_samples += int(alarm)
 
-    # 3. Sudden Shock
     detector_shock = AdaptiveCUSUMDetector(burn_in=30)
     shock_lag = -1
     for i in range(50):
-        val = 10.0 + np.random.normal(0, 0.2) if i < 35 else 25.0
-        is_alarm, _ = detector_shock.update(val)
-        if i >= 35 and is_alarm and shock_lag == -1:
+        value = 10.0 + rng.normal(0, 0.2) if i < 35 else 25.0
+        alarm, _ = detector_shock.update(float(value))
+        if i >= 35 and alarm and shock_lag == -1:
             shock_lag = i - 35
-            break
 
-    # 4. Input Sanitization Check
-    detector_corrupt = AdaptiveCUSUMDetector(burn_in=10)
-    sanitization_status = "PASSED"
-    try:
-        for bad_val in [10.2, None, "CORRUPT_SIGNAL", 10.5]:
-            if bad_val is None or isinstance(bad_val, str):
-                continue
-            detector_corrupt.update(float(bad_val))
-    except Exception:
-        sanitization_status = "FAILED"
+    invalid_values = [None, "CORRUPT_SIGNAL", float("nan"), float("inf"), True]
+    rejected = 0
+    validation_errors = []
+    for bad_value in invalid_values:
+        candidate = AdaptiveCUSUMDetector(burn_in=10)
+        before = (candidate.step, len(candidate.history), candidate.tracker, candidate.floor)
+        try:
+            candidate.update(bad_value)
+            validation_errors.append(f"{type(bad_value).__name__} was accepted")
+        except (ValueError, TypeError):
+            rejected += 1
+        after = (candidate.step, len(candidate.history), candidate.tracker, candidate.floor)
+        if before != after:
+            validation_errors.append(f"state mutated for {type(bad_value).__name__}")
 
-    # Construct the Certificate String
-    certificate_content = f"""======================================================================
-         STREAMING GUARDIAN V1.0.0 - MODEL BEHAVIOR CERTIFICATE
+    malformed_status = "PASSED" if rejected == len(invalid_values) and not validation_errors else "FAILED"
+    rng_repeat = np.random.default_rng(42).normal(size=8)
+    rng_repeat_2 = np.random.default_rng(42).normal(size=8)
+    reproducibility_status = "PASSED" if np.array_equal(rng_repeat, rng_repeat_2) else "FAILED"
+
+    report = f"""======================================================================
+STREAMING GUARDIAN - EMPIRICAL BEHAVIOR REPORT
 ======================================================================
 Generated At: {timestamp}
 Package Name: streaming_guardian
-Core Engine : Adaptive CUSUM-Based Sequential Inference Engine
+Git Commit Reference: {get_git_commit()}
+Python Version: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}
+Random Generator: numpy.default_rng(42)
 
-VALIDATION CONFIGURATION METADATA:
+SCOPED OBSERVATIONS (single deterministic smoke scenarios; not guarantees)
 ----------------------------------------------------------------------
-Random Seed    : 42                      Burn-In Window : 30 samples
-Noise Sigma (σ): 2.5                     Drift Rate     : 0.05 / sample
-Jump Magnitude : +15.0 units             SDK Version    : 1.0.0
-Python Version : {python_version}                 Git Commit Reference: {git_commit}
+Creeping-drift first alarm lag: {drift_lag} samples (-1 means no alarm)
+Noise scenario alarm-sample count: {false_alarm_samples}/{total_noise_samples}
+Sudden-shock first alarm lag: {shock_lag} samples (-1 means no alarm)
+Malformed-input rejection: {malformed_status} ({rejected}/{len(invalid_values)} rejected)
+Seeded generator reproducibility smoke check: {reproducibility_status}
 
-PROPRIETARY VALIDATION HARNESS REPORT:
+Malformed-input test errors:
+{chr(10).join(validation_errors) if validation_errors else "None"}
+
+LIMITATIONS
 ----------------------------------------------------------------------
-1. CHANGE-POINT SENSITIVITY (CREEPING DRIFT)
-   - Profile          : Non-stationary mean injection (Gradual leak)
-   - Empirical Lag    : {drift_lag} samples
-   - Classification   : Bounded Memory Accumulation [PASSED]
-
-2. NOISE ROBUSTNESS (VARIANCE TOLERANCE)
-   - Profile          : Low SNR Regime / Heteroscedastic Noise Stress
-   - Target Variance  : Sigma = 2.5 (Extreme variance scale)
-   - False Alarm Rate : {fpr:.2f}%
-   - Classification   : Adaptive Thresholding Resilience [PASSED]
-
-3. SHOCK RESPONSE (STEP DISCONTINUITY)
-   - Profile          : Instantaneous Structural Jump (10.0 -> 25.0)
-   - Reaction Delay   : {shock_lag} samples
-   - Classification   : High-Gain Sudden Change Interception [PASSED]
-
-4. RUNTIME INPUT ROBUSTNESS
-   - Profile          : Malformed streams / Missing Types (NaN, String)
-   - Stability Status : {sanitization_status}
-   - Classification   : Runtime Stability Under Tested Inputs [PASSED]
-
-----------------------------------------------------------------------
-SYSTEM INFERENCE SUMMARY:
-The underlying streaming guardian module has behaviorally proven 
-reproducible structural stability under non-stationarity, extreme variance 
-noise, and input discontinuities matching the constraints detailed above.
+These smoke scenarios do not establish a calibrated false-alarm probability,
+general detection guarantee, or performance across all noise regimes. The
+noise count above is a sample count from one stream, not a trial-level FPR.
+Run benchmarks/benchmark_runner.py for separately reported empirical
+pre-change trial probability, pre-change sample rate, detection probability,
+and conditional detection delay. Results depend on scenario and parameters.
 ======================================================================
 """
-    
-    with open("MODEL_BEHAVIOR_CERTIFICATE.txt", "w") as f:
-        f.write(certificate_content)
-        
-    print("✅ Grounded Model Behavior Certificate successfully compiled and minted.")
+    with open("MODEL_BEHAVIOR_CERTIFICATE.txt", "w", encoding="utf-8") as handle:
+        handle.write(report)
+    if malformed_status != "PASSED" or reproducibility_status != "PASSED":
+        raise SystemExit("Behavior report checks failed; inspect the generated report.")
+    print("Empirical behavior report generated; it does not certify universal performance.")
+
 
 if __name__ == "__main__":
     generate_certificate()
