@@ -39,3 +39,27 @@ def summarize_trials(num_trials, change_point, false_alarm_counts, detection_del
         "total_trials": int(num_trials),
         "pre_change_samples": int(num_trials * change_point),
     }
+
+
+
+def wilson_interval(successes, total, z=1.96):
+    """Return a two-sided Wilson score interval for a binomial proportion."""
+    import math
+    from numbers import Real
+
+    if isinstance(successes, bool) or not isinstance(successes, Integral):
+        raise ValueError("successes must be an integer.")
+    if isinstance(total, bool) or not isinstance(total, Integral) or total < 1:
+        raise ValueError("total must be a positive integer.")
+    if successes < 0 or successes > total:
+        raise ValueError("successes must be between zero and total.")
+    if isinstance(z, bool) or not isinstance(z, Real) or not math.isfinite(float(z)) or z <= 0:
+        raise ValueError("z must be a positive finite real number.")
+
+    n = float(total)
+    p = successes / n
+    z2 = float(z) ** 2
+    denominator = 1.0 + z2 / n
+    center = (p + z2 / (2.0 * n)) / denominator
+    margin = (float(z) * math.sqrt((p * (1.0 - p) / n) + (z2 / (4.0 * n * n)))) / denominator
+    return max(0.0, center - margin), min(1.0, center + margin)
