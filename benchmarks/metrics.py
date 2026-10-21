@@ -63,3 +63,39 @@ def wilson_interval(successes, total, z=1.96):
     center = (p + z2 / (2.0 * n)) / denominator
     margin = (float(z) * math.sqrt((p * (1.0 - p) / n) + (z2 / (4.0 * n * n)))) / denominator
     return max(0.0, center - margin), min(1.0, center + margin)
+
+
+
+def classify_first_alarms(first_alarm_indices, change_point, stream_length):
+    """Classify trials by their first alarm, avoiding false-alarm/detection double counting.
+
+    An alarm before the known change point classifies that trial as a false-alarm
+    trial. A later alarm in that same trial is not counted as a successful
+    detection, because the detector had already alarmed before the change.
+    """
+    if isinstance(change_point, bool) or not isinstance(change_point, Integral) or change_point < 1:
+        raise ValueError("change_point must be a positive integer.")
+    if isinstance(stream_length, bool) or not isinstance(stream_length, Integral) or stream_length <= change_point:
+        raise ValueError("stream_length must be an integer greater than change_point.")
+    if not isinstance(first_alarm_indices, (list, tuple)):
+        raise ValueError("first_alarm_indices must be a list or tuple.")
+    for index in first_alarm_indices:
+        if index is None:
+            continue
+        if isinstance(index, bool) or not isinstance(index, Integral) or not 0 <= index < stream_length:
+            raise ValueError("Each first alarm index must be None or an in-range integer.")
+
+    false_alarm_trials = sum(index is not None and index < change_point for index in first_alarm_indices)
+    detection_delays = [
+        int(index - change_point)
+        for index in first_alarm_indices
+        if index is not None and index >= change_point
+    ]
+    no_alarm_trials = sum(index is None for index in first_alarm_indices)
+    return {
+        "false_alarm_trials": false_alarm_trials,
+        "detection_delays": detection_delays,
+        "detected_trials": len(detection_delays),
+        "no_alarm_trials": no_alarm_trials,
+        "total_trials": len(first_alarm_indices),
+    }

@@ -2,7 +2,7 @@
 import time
 import numpy as np
 from streaming_guardian.detectors.framework_core import AdaptiveCUSUMDetector
-from benchmarks.metrics import summarize_trials, wilson_interval
+from benchmarks.metrics import summarize_trials, wilson_interval, classify_first_alarms
 
 
 def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, seed=42):
@@ -25,7 +25,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
 
     for regime in regimes:
         false_alarm_counts = []
-        delays = []
+        first_alarm_indices = []
         no_change_alarm_counts = []
         start_time = time.perf_counter()
 
@@ -39,18 +39,18 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
             stream = noise + drift
             detector = AdaptiveCUSUMDetector(burn_in=min(30, change_point))
             pre_alarm_count = 0
-            first_post_alarm = None
+            first_alarm_index = None
 
             for idx, value in enumerate(stream):
                 alarm, _ = detector.update(float(value))
-                if alarm and idx < change_point:
-                    pre_alarm_count += 1
-                elif alarm and idx >= change_point and first_post_alarm is None:
-                    first_post_alarm = idx
+                if alarm:
+                    if first_alarm_index is None:
+                        first_alarm_index = idx
+                    if idx < change_point:
+                        pre_alarm_count += 1
 
             false_alarm_counts.append(pre_alarm_count)
-            if first_post_alarm is not None:
-                delays.append(first_post_alarm - change_point)
+            first_alarm_indices.append(first_alarm_index)
 
         # Independent baseline-only trials estimate false-alarm probability
         # over the full horizon, without mixing false alarms with detections.
@@ -64,6 +64,8 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
             no_change_alarm_counts.append(alarm_samples)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
+        alarm_classification = classify_first_alarms(first_alarm_indices, change_point, stream_length)
+        delays = alarm_classification["detection_delays"]
         metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
         no_change_alarm_trials = sum(count > 0 for count in no_change_alarm_counts)
         no_change_alarm_samples = sum(no_change_alarm_counts)
