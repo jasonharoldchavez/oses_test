@@ -2,7 +2,7 @@
 import time
 import numpy as np
 from streaming_guardian.detectors.framework_core import AdaptiveCUSUMDetector
-from benchmarks.metrics import summarize_trials, wilson_interval
+from benchmarks.metrics import summarize_trials, wilson_interval, classify_first_alarms
 
 
 def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, seed=42):
@@ -39,7 +39,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
             stream = noise + drift
             detector = AdaptiveCUSUMDetector(burn_in=min(30, change_point))
             pre_alarm_count = 0
-            first_post_alarm = None
+            first_alarm_index = None
 
             for idx, value in enumerate(stream):
                 alarm, _ = detector.update(float(value))
@@ -64,7 +64,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
             no_change_alarm_counts.append(alarm_samples)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
-        metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
+        alarm_classification = classify_first_alarms(first_alarm_indices, change_point, stream_length)\n        delays = alarm_classification["detection_delays"]\n        metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
         no_change_alarm_trials = sum(count > 0 for count in no_change_alarm_counts)
         no_change_alarm_samples = sum(no_change_alarm_counts)
         no_change_probability = no_change_alarm_trials / num_trials
