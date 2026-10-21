@@ -1,82 +1,106 @@
 # Streaming Guardian
 
-Streaming Guardian is an adaptive anomaly detection and telemetry
-analysis framework designed for real-time monitoring, detection, and
-validation of streaming data systems.
+Streaming Guardian is a Python toolkit for experimenting with sequential
+change detection and telemetry monitoring. Its adaptive CUSUM-style detector
+is a heuristic; it is not a calibrated probabilistic model, and its thresholds
+must be evaluated against the intended data and operating conditions.
 
-## License
+## Current scope
 
-Streaming Guardian is dual licensed.
+- `streaming_guardian/`: detector implementation.
+- `benchmarks/benchmark_runner.py`: reproducible, synthetic scenario audit
+  for the adaptive detector, including independent no-change trials.
+- `benchmarks/metrics.py`: metric summaries and Wilson score intervals for
+  trial-level binomial proportions.
+- `tests/`: regression tests for input validation and benchmark metrics.
 
-### Open Source License
+## Install for development
 
-The community edition is available under the Apache License 2.0.
+From the repository root:
 
-See:
-`LICENSE`
+```bash
+python -m pip install -e .
+```
 
-### Commercial License
+The core runtime dependency is NumPy. The GitHub Actions workflow installs
+pytest for the test suite.
 
-Organizations requiring proprietary deployment, enterprise usage,
-commercial redistribution rights, customization, or additional
-licensing options may use the commercial license.
+## Run tests
 
-See:
-`LICENSE-COMMERCIAL.txt`
+```bash
+python -m pytest -q
+```
 
-## Copyright
+The repository's CI currently runs the detector, benchmark-metric,
+certificate, and benchmark-configuration regression tests on Python 3.10,
+3.11, 3.12, and 3.13. A passing test suite establishes only the tested
+software behaviors; it does not establish operational performance.
 
-Copyright (c) 2026 Jason Harold Chavez.
+## Run the synthetic benchmark
 
-This project is dual licensed under Apache License 2.0 and a separate Commercial License.
+```bash
+python -m benchmarks.benchmark_runner
+```
 
-Streaming Guardian (Developer SDK)
+The default run uses 1,000 trials per scenario, a stream length of 120, and a
+change point at sample 50. It reports:
 
-Streaming Guardian is a production-grade, lightweight sequential data drift testing module and streaming anomaly detection SDK. It provides an installable package layout alongside independent benchmarking harnesses to evaluate sequential metrics under controlled statistical profiles.
+- pre-change false-alarm trial probability;
+- pre-change false-alarm sample rate;
+- post-change detection probability;
+- no-change false-alarm probability from separate baseline-only trials;
+- no-change alarm-sample rate;
+- mean detection delay conditional on detection; and
+- runtime.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/jasonharoldchavez/oses_test)
-[![License](https://img.shields.io/badge/license-Commercial-red.svg)](LICENSE.txt)
+The benchmark uses seeded synthetic data and reports Wilson 95% confidence
+intervals for selected trial-level probabilities. These intervals describe
+sampling uncertainty under the benchmark's assumptions; they do not establish
+performance on unseen real-world streams. The no-change false-alarm estimate
+also depends on the chosen stream length. Results must be reported with the
+scenario parameters, detector configuration, seed, and source revision.
 
-## 🚀 Quick Example
-Implement real-time anomaly detection inside your streaming telemetry pipelines natively:
+The current default statistical runner evaluates the adaptive detector only.
+A separate comparison loop exists in `streaming_guardian/detectors/framework_core.py`,
+but its results should not be presented as a validated head-to-head benchmark
+until its scenario generation, alarm handling, and metrics are independently
+reviewed and covered by tests.
+
+## Example
 
 ```python
 from streaming_guardian import AdaptiveCUSUMDetector
 
-# Initialize the engine
 detector = AdaptiveCUSUMDetector(burn_in=30)
 
-# Process live streaming telemetry sequentially
 for sample in data_stream:
-    is_alarm, score = detector.update(sample)
-    if is_alarm:
-        print(f"⚠️ Anomaly Detected! Internal Score: {score:.3f}")
+    alarm, score = detector.update(sample)
+    if alarm:
+        print(f"Detector alarm; internal score={score:.3f}")
 ```
 
-## 🛠️ Project Architecture
-* **`streaming_guardian/`**: Core distribution library containing the self-correcting detection logic.
-* **`benchmarks/`**: Separate evaluation scripts to stress-test detectors against synthetic baselines.
-* **`tests/`**: Functional validation testing suites (`pytest` compatible).
+An alarm means the detector's configured rule fired. It is not, by itself,
+proof that the data point is erroneous or that a real-world fault occurred.
 
-## 🚀 Quickstart Installation
-Install the package locally in editable development mode from the project root:
-```bash
-pip install -e .
-```
+## Evidence and release status
 
-## 📊 Empirical Evaluation Metrics
+The checked-in tests and synthetic benchmark are engineering tools, not a
+production-readiness certificate. Before deployment, evaluate the detector on
+representative historical and live-like data, define acceptable false-alarm
+and missed-detection costs, measure resource use, and establish monitoring and
+rollback procedures.
 
-### 1. Multi-Regime Adversarial Audit (3,000 Total Trials)
-* **Standard Creeping Drift:** Mean Detection Latency: 10.86 samples | **0.0000% False Positive Rate**
-* **High Noise / Slow Leak:** Mean Detection Latency: 17.44 samples | **0.1120% False Positive Rate**
-* **Extreme Volatility / Jump:** Mean Detection Latency: 2.45 samples | **0.8160% False Positive Rate**
+## License review required
 
-### 2. The Baseline Comparison War (1,000 Total Trials)
-* **Adaptive CUSUM (Ours):** **0.0000% FPR** | 100.00% Detection Rate | 10.91 Mean Sample Delay
-* **Static CUSUM Baseline:** 3.0160% FPR | 100.00% Detection Rate | 6.85 Mean Sample Delay
-* **Rolling Z-Score Filter:** 1.2800% FPR | 100.00% Detection Rate | 8.40 Mean Sample Delay
+The repository's license references currently need reconciliation before a
+release or commercial distribution decision:
 
-## ⚖️ Commercial License
-Copyright (c) 2026 Jason Harold Chavez. All rights reserved.
+- `pyproject.toml` points to `LICENSE.txt`.
+- The README previously linked `LICENSE` and `LICENSE-COMMERCIAL.txt`, but
+  those paths are not present on the default branch.
+- `LICENSE.txt` contains Apache License 2.0 text followed by additional
+  commercial-license terms.
 
-This project is distributed under a proprietary Commercial License. See `LICENSE.txt` for full licensing terms and restrictions.
+This README does not resolve the legal effect of that combined file. Confirm
+the intended licensing model and make the license files, package metadata,
+README, and distribution artifacts consistent before publishing a release.
