@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from benchmarks.metrics import summarize_trials
+from benchmarks.metrics import summarize_trials, wilson_interval
 
 
 class BenchmarkMetricTests(unittest.TestCase):
@@ -24,6 +24,23 @@ class BenchmarkMetricTests(unittest.TestCase):
         metrics = summarize_trials(2, 10, [0, 0], [])
         self.assertTrue(math.isnan(metrics["mean_delay_given_detection"]))
         self.assertEqual(metrics["detection_probability"], 0.0)
+
+    def test_wilson_interval_bounds_and_zero_success_case(self):
+        low, high = wilson_interval(0, 100)
+        self.assertEqual(low, 0.0)
+        self.assertGreater(high, 0.0)
+        low, high = wilson_interval(100, 100)
+        self.assertLess(low, 1.0)
+        self.assertEqual(high, 1.0)
+        low, high = wilson_interval(50, 100)
+        self.assertLess(low, 0.5)
+        self.assertGreater(high, 0.5)
+
+    def test_wilson_interval_rejects_invalid_counts(self):
+        for successes, total in [(-1, 10), (11, 10), (0, 0), (True, 10), (1, True)]:
+            with self.subTest(successes=successes, total=total):
+                with self.assertRaises(ValueError):
+                    wilson_interval(successes, total)
 
     def test_invalid_metric_inputs_rejected(self):
         cases = [
