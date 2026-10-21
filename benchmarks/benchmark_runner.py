@@ -25,7 +25,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
 
     for regime in regimes:
         false_alarm_counts = []
-        delays = []
+        first_alarm_indices = []
         no_change_alarm_counts = []
         start_time = time.perf_counter()
 
@@ -43,14 +43,14 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
 
             for idx, value in enumerate(stream):
                 alarm, _ = detector.update(float(value))
-                if alarm and idx < change_point:
-                    pre_alarm_count += 1
-                elif alarm and idx >= change_point and first_post_alarm is None:
-                    first_post_alarm = idx
+                if alarm:
+                    if first_alarm_index is None:
+                        first_alarm_index = idx
+                    if idx < change_point:
+                        pre_alarm_count += 1
 
             false_alarm_counts.append(pre_alarm_count)
-            if first_post_alarm is not None:
-                delays.append(first_post_alarm - change_point)
+            first_alarm_indices.append(first_alarm_index)
 
         # Independent baseline-only trials estimate false-alarm probability
         # over the full horizon, without mixing false alarms with detections.
@@ -64,7 +64,9 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
             no_change_alarm_counts.append(alarm_samples)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
-        alarm_classification = classify_first_alarms(first_alarm_indices, change_point, stream_length)\n        delays = alarm_classification["detection_delays"]\n        metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
+        alarm_classification = classify_first_alarms(first_alarm_indices, change_point, stream_length)
+        delays = alarm_classification["detection_delays"]
+        metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
         no_change_alarm_trials = sum(count > 0 for count in no_change_alarm_counts)
         no_change_alarm_samples = sum(no_change_alarm_counts)
         no_change_probability = no_change_alarm_trials / num_trials
@@ -72,7 +74,8 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
         pre_change_ci = wilson_interval(metrics["false_alarm_trials"], num_trials)
         detection_ci = wilson_interval(metrics["detected_trials"], num_trials)
 
-        print(f"\nScenario: {regime['name']}")
+        print(f"
+Scenario: {regime['name']}")
         print(f"  Pre-change alarm-trial probability:        {metrics['false_alarm_trial_probability']:.4f} ({metrics['false_alarm_trials']}/{num_trials}); Wilson 95% CI [{pre_change_ci[0]:.4f}, {pre_change_ci[1]:.4f}]")
         print(f"  Pre-change alarm-sample rate:              {metrics['false_alarm_sample_rate']:.6f} ({metrics['false_alarm_samples']}/{metrics['pre_change_samples']})")
         print(f"  Post-change detection probability:         {metrics['detection_probability']:.4f} ({metrics['detected_trials']}/{num_trials}); Wilson 95% CI [{detection_ci[0]:.4f}, {detection_ci[1]:.4f}]")
@@ -80,7 +83,8 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
         print(f"  No-change alarm-sample rate:               {no_change_alarm_samples / (num_trials * stream_length):.6f} ({no_change_alarm_samples}/{num_trials * stream_length})")
         print(f"  Mean delay, conditional on detection:      {metrics['mean_delay_given_detection']:.2f} samples")
         print(f"  Runtime:                                   {elapsed_ms:.2f} ms")
-    print("\nEmpirical results only; they are not universal performance guarantees.")
+    print("
+Empirical results only; they are not universal performance guarantees.")
 
 
 if __name__ == "__main__":
