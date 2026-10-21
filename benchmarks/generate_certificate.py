@@ -17,7 +17,7 @@ def get_git_commit():
 
 
 def generate_certificate():
-    timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     rng = np.random.default_rng(42)
 
     detector_drift = AdaptiveCUSUMDetector(burn_in=30)
