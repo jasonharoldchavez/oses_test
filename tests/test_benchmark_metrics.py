@@ -1,7 +1,7 @@
 import math
 import unittest
 
-from benchmarks.metrics import summarize_trials, wilson_interval
+from benchmarks.metrics import summarize_trials, wilson_interval, classify_first_alarms
 
 
 class BenchmarkMetricTests(unittest.TestCase):
@@ -42,6 +42,30 @@ class BenchmarkMetricTests(unittest.TestCase):
             with self.subTest(successes=successes, total=total):
                 with self.assertRaises(ValueError):
                     wilson_interval(successes, total)
+
+    def test_first_alarm_prevents_false_alarm_and_detection_double_count(self):
+        classified = classify_first_alarms(
+            first_alarm_indices=[2, 6, None, 4],
+            change_point=5,
+            stream_length=10,
+        )
+        self.assertEqual(classified["false_alarm_trials"], 2)
+        self.assertEqual(classified["detection_delays"], [1])
+        self.assertEqual(classified["detected_trials"], 1)
+        self.assertEqual(classified["no_alarm_trials"], 1)
+        self.assertEqual(classified["total_trials"], 4)
+
+    def test_first_alarm_classification_rejects_invalid_indices(self):
+        for indices, change_point, stream_length in [
+            ([True], 5, 10),
+            ([-1], 5, 10),
+            ([10], 5, 10),
+            ([1], 5, 5),
+            ("bad", 5, 10),
+        ]:
+            with self.subTest(indices=indices):
+                with self.assertRaises(ValueError):
+                    classify_first_alarms(indices, change_point, stream_length)
 
     def test_invalid_metric_inputs_rejected(self):
         cases = [
