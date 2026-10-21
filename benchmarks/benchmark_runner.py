@@ -6,12 +6,12 @@ from benchmarks.metrics import summarize_trials
 
 
 def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, seed=42):
-    if not isinstance(num_trials, int) or num_trials < 1:
+    if isinstance(num_trials, bool) or not isinstance(num_trials, int) or num_trials < 1:
         raise ValueError("num_trials must be a positive integer.")
-    if not isinstance(stream_length, int) or stream_length < 2:
+    if isinstance(stream_length, bool) or not isinstance(stream_length, int) or stream_length < 3:
         raise ValueError("stream_length must be an integer >= 2.")
-    if not isinstance(change_point, int) or not 1 <= change_point < stream_length:
-        raise ValueError("change_point must lie inside the stream.")
+    if isinstance(change_point, bool) or not isinstance(change_point, int) or not 2 <= change_point < stream_length:
+        raise ValueError("change_point must be an integer in [2, stream_length).")
 
     regimes = [
         {"name": "Standard Creeping Drift", "noise_scale": 0.4, "drift_slope": 0.10},
@@ -35,7 +35,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
                 offset = idx - change_point
                 drift[idx] = regime["drift_slope"] if regime["drift_slope"] > 1.0 else offset * regime["drift_slope"]
             stream = noise + drift
-            detector = AdaptiveCUSUMDetector(burn_in=min(30, max(2, change_point)))
+            detector = AdaptiveCUSUMDetector(burn_in=min(30, change_point))
             pre_alarm_count = 0
             first_post_alarm = None
 
