@@ -2,6 +2,7 @@
 import time
 import numpy as np
 from streaming_guardian.detectors.framework_core import AdaptiveCUSUMDetector
+from benchmarks.metrics import summarize_trials
 
 
 def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, seed=42):
@@ -23,9 +24,7 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
     print("False-alarm trial probability and alarm-sample rate are reported separately.")
 
     for regime in regimes:
-        false_alarm_trials = 0
-        false_alarm_samples = 0
-        detection_trials = 0
+        false_alarm_counts = []
         delays = []
         start_time = time.perf_counter()
 
@@ -47,23 +46,20 @@ def run_statistical_audit(num_trials=1000, stream_length=120, change_point=50, s
                 elif alarm and idx >= change_point and first_post_alarm is None:
                     first_post_alarm = idx
 
-            if pre_alarm_count:
-                false_alarm_trials += 1
-                false_alarm_samples += pre_alarm_count
+            false_alarm_counts.append(pre_alarm_count)
             if first_post_alarm is not None:
-                detection_trials += 1
                 delays.append(first_post_alarm - change_point)
 
         elapsed_ms = (time.perf_counter() - start_time) * 1000
-        pre_samples = num_trials * change_point
-        trial_probability = false_alarm_trials / num_trials
-        sample_rate = false_alarm_samples / pre_samples
-        detection_probability = detection_trials / num_trials
-        mean_delay = float(np.mean(delays)) if delays else float("nan")
+        metrics = summarize_trials(num_trials, change_point, false_alarm_counts, delays)
+        trial_probability = metrics["false_alarm_trial_probability"]
+        sample_rate = metrics["false_alarm_sample_rate"]
+        detection_probability = metrics["detection_probability"]
+        mean_delay = metrics["mean_delay_given_detection"]
         print(f"\nScenario: {regime['name']}")
-        print(f"  Pre-change false-alarm trial probability: {trial_probability:.4f} ({false_alarm_trials}/{num_trials})")
-        print(f"  Pre-change false-alarm sample rate:       {sample_rate:.6f} ({false_alarm_samples}/{pre_samples})")
-        print(f"  Post-change detection probability:        {detection_probability:.4f} ({detection_trials}/{num_trials})")
+        print(f"  Pre-change false-alarm trial probability: {trial_probability:.4f} ({metrics["false_alarm_trials"]}/{num_trials})")
+        print(f"  Pre-change false-alarm sample rate:       {sample_rate:.6f} ({metrics["false_alarm_samples"]}/{metrics["pre_change_samples"]})")
+        print(f"  Post-change detection probability:        {detection_probability:.4f} ({metrics["detected_trials"]}/{num_trials})")
         print(f"  Mean delay, conditional on detection:     {mean_delay:.2f} samples")
         print(f"  Runtime:                                  {elapsed_ms:.2f} ms")
     print("\nEmpirical results only; they are not universal performance guarantees.")
