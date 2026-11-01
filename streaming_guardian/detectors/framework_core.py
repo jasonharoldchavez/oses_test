@@ -29,7 +29,9 @@ class AdaptiveCUSUMDetector(AbstractDecisionLayer):
 
     This heuristic detector is not a calibrated probabilistic model. Its
     adaptive floor and threshold require scenario-specific evaluation before
-    any false-alarm or detection guarantee is claimed.
+    any false-alarm or detection guarantee is claimed. History is bounded:
+    burn-in samples are retained for calibration, then only the latest 15
+    samples are kept for adaptive-floor updates.
     """
     def __init__(self, burn_in=30):
         if isinstance(burn_in, bool) or not isinstance(burn_in, Integral) or burn_in < 2:
@@ -65,6 +67,13 @@ class AdaptiveCUSUMDetector(AbstractDecisionLayer):
             self.floor = 0.95 * self.floor + 0.05 * (np.mean(recent_window) + 0.5 * np.std(recent_window))
 
         self.tracker = max(0.0, self.tracker + signal - self.floor)
+
+        # Keep the rolling history bounded after burn-in. The detector only
+        # needs the latest 15 values for adaptive-floor updates; self.step
+        # remains the lifetime sample counter.
+        if len(self.history) > 15:
+            del self.history[:-15]
+
         return self.tracker > self.h, self.tracker
 
 if __name__ == "__main__":
