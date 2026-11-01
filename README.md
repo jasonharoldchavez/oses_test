@@ -8,6 +8,9 @@ must be evaluated against the intended data and operating conditions.
 ## Current scope
 
 - `streaming_guardian/`: detector implementation.
+- The adaptive detector retains the calibration window during burn-in and
+  then bounds its rolling history to 15 samples; its lifetime sample counter
+  remains available in `step`.
 - `benchmarks/benchmark_runner.py`: reproducible, synthetic scenario audit
   for the adaptive detector, including independent no-change trials.
 - `benchmarks/metrics.py`: metric summaries and Wilson score intervals for
