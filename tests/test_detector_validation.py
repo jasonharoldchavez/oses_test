@@ -33,6 +33,16 @@ class DetectorValidationTests(unittest.TestCase):
         self.assertEqual(detector.step, 3)
         self.assertTrue(math.isfinite(detector.floor))
 
+    def test_history_is_bounded_after_burn_in(self):
+        detector = AdaptiveCUSUMDetector(burn_in=5)
+
+        for _ in range(10_000):
+            detector.update(10.0)
+
+        self.assertEqual(detector.step, 10_000)
+        self.assertEqual(len(detector.history), 15)
+        self.assertEqual(detector.history, [10.0] * 15)
+
 
 if __name__ == "__main__":
     unittest.main()
