@@ -66,6 +66,20 @@ but its results should not be presented as a validated head-to-head benchmark
 until its scenario generation, alarm handling, and metrics are independently
 reviewed and covered by tests.
 
+## Fixed-baseline detector (new)
+
+`StandardizedCUSUMDetector` is an additional, explicitly fixed-reference option. It estimates mean and sample standard deviation during burn-in, freezes both after calibration, standardizes subsequent observations, and accumulates positive and negative CUSUM statistics independently. It does not adapt its baseline after calibration. Configure `burn_in`, `k`, `h`, and `min_std` for the target metric and validate them on representative data. Its threshold is not a universal false-alarm guarantee.
+
+```python
+from streaming_guardian import StandardizedCUSUMDetector
+
+detector = StandardizedCUSUMDetector(burn_in=30, k=0.5, h=5.0)
+for sample in data_stream:
+    alarm, score = detector.update(sample)
+    if alarm:
+        print(f"Change signal; standardized CUSUM score={score:.3f}")
+```
+
 ## Example
 
 ```python
